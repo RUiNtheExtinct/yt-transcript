@@ -1,0 +1,15 @@
+*.mp4
+venv
+*.mp3 
+*.json
+__pycache__
+ref
+sample.txt
+*.exe
+.env
+.coverage
+coverage.xml
+results.csv
+ytcookies.txt
+.env
+log.txt
