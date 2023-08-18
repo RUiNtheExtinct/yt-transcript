@@ -16,7 +16,7 @@ open sourcing this content again for free computing power
 
 Python cmd tool to parse any youtube video or livestream and save it in 10 seconds intervals to send to whisper/wit.ai for speech recognization (free to use).
 
-Install [ffmpeg](https://ffmpeg.org/download.html) for best results. **(optional)**
+Install [ffmpeg](https://ffmpeg.org/download.html) for best results. **(NOT optional)**
 
 Install [MySQL](https://dev.mysql.com/downloads/installer/) and add the required keys to the .env file to save the generated transcriptions to database. **(optional)**
 
@@ -28,3 +28,16 @@ Create a discord webhook and add the webhook url to the .env file to send the ge
 -   Now go to any youtube video and click on the extension icon and click on `Export cookies.txt` and save the file.
 -   Make sure that you are logged in to youtube in your browser from the account that has access to view the private video/livestream.
 -   Make sure that the cookies file is in the root directory of this project and named `ytcookies.txt`.
+
+### Usage
+
+-   Install the required libraries using `pip install -r requirements.txt`
+-   Create a `.env` file in the root directory of this project and add the keys to it by following the [`.env.example`](./.env.example) file.
+-   To get transcription for a youtube video, run:
+    ```python
+    	python transcribe_video_private.py --url="<youtube_video_url>"
+    ```
+-   To get live transcriptions for an ongoing youtube livestream, run:
+    ```python
+    	python transcript_manager.py --url="<youtube_livestream_url>"
+    ```

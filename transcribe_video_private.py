@@ -150,7 +150,7 @@ if __name__ == "__main__":
     ic("Running main")
     if os.environ.get("WIT_AI_TOKEN") is None:
         print("WIT_AI_TOKEN is not set")
-        exit(1)
+        # exit(1)
     dict_args = {
         "url": args.url,
         "exit_on_video": args.exit_for_videos,
