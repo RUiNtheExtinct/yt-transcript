@@ -49,6 +49,7 @@ def send_discord_msg(data):
     url = os.getenv("DISCORD_WEBHOOK")
     if url is None:
         print('DISCORD_WEBHOOK Missing')
+        return
     # TODO figure out how to post to threads
     ic("Trying to send discord message")
     # try:
