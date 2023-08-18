@@ -73,7 +73,13 @@ class FD_RTT:
         self.video_title = clean_string(self.metadata.get("title", table_name))
 
 
-        self.db_manager = DB_MANAGER()
+        try:
+            self.db_manager = DB_MANAGER()
+        except Exception as e:
+            print(e)
+            ic("Failed to connect to database")
+            self.db_manager = None
+
         try:
             print("Creating table for named: ", self.video_id)
             # create table if it doesn't exist
@@ -81,7 +87,6 @@ class FD_RTT:
         except Exception as e:
             print(e)
             ic("Failed to make table")
-            exit(1)
 
         self.video_folder = os.path.join(os.getcwd(), "videos", self.video_title)
         
@@ -152,7 +157,9 @@ class FD_RTT:
             # send_discord_file(filename=partial_output, file=open(partial_output, "rb"))
             text = data.get("text", "")
             curr_iteration = self.global_iteration * MAX_ITERATIONS + self.stats["iterations"]
-            self.db_manager.insert_into_db(self.video_id, text, self.video_url, curr_iteration)
+            if self.db_manager:
+                self.db_manager.insert_into_db(self.video_id, text, self.video_url, curr_iteration)
+
             # make function to convert seconds to human readable time
             data = {}
             # adjust runtime based on iteration if available

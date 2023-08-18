@@ -1,10 +1,13 @@
 # simple script to transcribe videos from a url like dropdown.abs(
-import os
-import requests
-import json
 import argparse
-from utils import send_discord_msg
+import json
+import os
+
+import requests
+
 from processing import transcribe_audio_whisper
+from utils import send_discord_msg
+
 
 def download_file_from_url(url, filename):
     # open in binary mode

@@ -9,12 +9,14 @@ open sourcing this content again for free computing power
 ### Libraries
 
 -   ffmpeg
--   wit.ai or speech recognization or whisper
+-   wit.ai or whisper
 -   youtube-dl
 -   yt-dlp
 -   asyncio
 
 Python cmd tool to parse any youtube video or livestream and save it in 10 seconds intervals to send to whisper/wit.ai for speech recognization (free to use).
+
+Install [ffmpeg](https://ffmpeg.org/download.html) for best results.
 
 -   To transcribe/download private videos/livestreams,you will need atleast one youtube account with atleast `view` access to the private video/livestream.
 -   You will also need the youtube cookies from your browser in the Netscape HTTP Cookie File format.
