@@ -58,8 +58,8 @@ def get_video_from_start(url: str, config: dict):
     #     , shell=True, capture_output=True
     # )
     result = subprocess.run(
-        f'yt-dlp -o {filename} --download-sections  \"*0:00-{end}\" --cookies ytcookies.txt {url}'
-        , shell=True, capture_output=True
+        f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --download-sections  \"*0:00-{end}\" --cookies ytcookies.txt {url}',
+        shell=True, capture_output=True
     )
     # result = subprocess.run(
     #     f'youtube-dl -x --postprocessor-args \"-t 00:{end}\" -o {filename} --cookies ytcookies.txt {url}'

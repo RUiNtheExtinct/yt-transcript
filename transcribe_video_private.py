@@ -62,7 +62,14 @@ class PrivateVideo:
             ic("Failed to make folder")
 
 
-        self.db_manager = DB_MANAGER()
+        try:
+            self.db_manager = DB_MANAGER()
+        except Exception as e:
+            ic("Failed to make db_manager")
+            print(e)
+            self.db_manager = None
+            # exit(1)
+
         try:
             print("Creating table for named: ", self.video_id)
             # create table if it doesn't exist
@@ -91,8 +98,8 @@ class PrivateVideo:
         print("downloading video", self.video_url)
         filename = os.path.join(self.video_folder, "video.mp4")
         result = subprocess.run(
-            f'youtube-dl -o {filename} --cookies ytcookies.txt {self.video_url}'
-            , shell=True, capture_output=True
+            f'youtube-dl \'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4\' -o {filename} --cookies ytcookies.txt {self.video_url}',
+            shell=True, capture_output=True
         )
         ic(result)
         return result.stdout.decode("utf-8")
