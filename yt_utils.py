@@ -4,7 +4,6 @@ import time
 from typing import List
 
 import youtube_dl
-
 from utils import ic
 
 youtube_livestream_codes = [
@@ -129,6 +128,7 @@ def get_video_metadata(video_url: str = "https://www.youtube.com/watch?v=21X5lGl
         info_dict = ydl.extract_info(video_url, download=False)
         video_title = info_dict.get('title', None)
         uploader_id = info_dict.get('uploader_id', None)
+        video_title = ''.join([i if ord(i) < 128 else '' for i in video_title])
         ic(f"[youtube] {video_title}: {uploader_id}")
     return info_dict
 

@@ -1,14 +1,17 @@
+
+#? Code to transcribe livestreams from any YouTube URL
+
 import argparse
 import json
 import os
 import shutil
 import time
 from operator import itemgetter
+from pathlib import Path
 from threading import Thread
 
-from dotenv import find_dotenv, load_dotenv
-
 from database import DB_MANAGER
+from dotenv import find_dotenv, load_dotenv
 from processing import (get_video_from_start, transcribe_audio_whisper,
                         transcribe_audio_wit)
 from utils import (append_to_github_actions, clean_string, format_time,
@@ -24,7 +27,7 @@ try:
     MAX_ITERATIONS = int(MAX_ITERATIONS)
 except Exception as e:
     print(e)
-VIDEO_CHUNK_LENGTH_IN_SECS = 0 * 60 + 10
+VIDEO_CHUNK_LENGTH_IN_SECS = 1 * 60 + 0
 # VIDEO_CHUNK_LENGTH_IN_SECS = 4 * 60 + 30
 # CHUNK_SIZE = int(7.03703704 * VIDEO_CHUNK_LENGTH_IN_SECS)
 CHUNK_SIZE = 1900
@@ -88,7 +91,7 @@ class FD_RTT:
             print(e)
             ic("Failed to make table")
 
-        self.video_folder = os.path.join(os.getcwd(), "videos", self.video_title)
+        self.video_folder = os.path.join(Path(os.path.dirname(os.path.abspath(__file__))), "videos", self.video_title)
         
         try:
             folder_path = self.video_folder
@@ -346,5 +349,3 @@ if __name__ == "__main__":
         "save_to_db": args.save_to_db,
     }
     main(dict_args)
-
-    # https://www.youtube.com/watch?v=8F5Mc5bKEdc&ab_channel=CNBCTelevision
