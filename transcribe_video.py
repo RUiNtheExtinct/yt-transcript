@@ -8,10 +8,12 @@ import os
 import shutil
 import subprocess
 import time
+from pathlib import Path
 
 import requests
-from database import DB_MANAGER
 from dotenv import find_dotenv, load_dotenv
+
+from database import DB_MANAGER
 from processing import transcribe_audio_whisper
 from utils import clean_string, get_video_id_from_ytube_url, send_discord_msg
 from yt_utils import get_video_metadata, ic
@@ -53,7 +55,7 @@ class Video:
             self.video_id = table_name
             
         self.video_title = clean_string(self.metadata.get("title", table_name))
-        self.video_folder = os.path.join(os.getcwd(), "videos", self.video_title)
+        self.video_folder = os.path.join(Path(os.path.dirname(os.path.abspath(__file__))), "videos", self.video_title)
         
         try:
             folder_path = self.video_folder
@@ -100,7 +102,7 @@ class Video:
         print("downloading video", self.video_url)
         filename = os.path.join(self.video_folder, "video.mp4")
         result = subprocess.run(
-            f'youtube-dl \'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4\' -o {filename} --cookies ytcookies.txt {self.video_url}',
+            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --cookies ytcookies.txt {self.video_url}',
             shell=True, capture_output=True
         )
         ic(result)
