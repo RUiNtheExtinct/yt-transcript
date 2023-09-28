@@ -25,6 +25,7 @@ LOG_FILE = "log.txt"
 def writeToLog(s):
     # write to sentry   
     # write to log file
+    s = remove_non_ascii(s)
     logging.warning(s)
     # colorizedStderrPrint(s)
     with open(LOG_FILE, "a") as f:
@@ -110,5 +111,14 @@ def clean_string(input_string):
     
     # Replace all occurrences of the pattern with underscores
     output_string = pattern.sub('_', input_string)
+    
+    return output_string
+
+def remove_non_ascii(input_string):
+    # Define a regular expression pattern to match special characters
+    pattern = re.compile(r'[^\x00-\x7F]+')
+    
+    # Replace all occurrences of the pattern with underscores
+    output_string = pattern.sub(' ', input_string)
     
     return output_string

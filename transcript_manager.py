@@ -10,12 +10,15 @@ from operator import itemgetter
 from pathlib import Path
 from threading import Thread
 
-from database import DB_MANAGER
+from docx import Document
 from dotenv import find_dotenv, load_dotenv
+
+from database import DB_MANAGER
 from processing import (get_video_from_start, transcribe_audio_whisper,
                         transcribe_audio_wit)
 from utils import (append_to_github_actions, clean_string, format_time,
-                   get_video_id_from_ytube_url, ic, send_discord_msg)
+                   get_video_id_from_ytube_url, ic, remove_non_ascii,
+                   send_discord_msg)
 from yt_utils import (get_video_metadata, youtube_livestream_codes,
                       youtube_mp4_codes)
 
@@ -27,17 +30,8 @@ try:
     MAX_ITERATIONS = int(MAX_ITERATIONS)
 except Exception as e:
     print(e)
-VIDEO_CHUNK_LENGTH_IN_SECS = 1 * 60 + 0
-# VIDEO_CHUNK_LENGTH_IN_SECS = 4 * 60 + 30
-# CHUNK_SIZE = int(7.03703704 * VIDEO_CHUNK_LENGTH_IN_SECS)
 CHUNK_SIZE = 1900
 
-# convert seconds to hours, minutes, seconds
-end_mins = VIDEO_CHUNK_LENGTH_IN_SECS // 60
-end_hrs = end_mins // 60
-end_mins = end_mins % 60
-end_secs = VIDEO_CHUNK_LENGTH_IN_SECS % 60
-end_time = f"{0 if end_hrs < 10 else None}{end_hrs}:{0 if end_mins < 10 else None}{end_mins}:{end_secs}"
 
 # free delayed real time transcription
 class FD_RTT:
@@ -48,9 +42,20 @@ class FD_RTT:
         self.stats = {
             "run_time": 0,
             "start_time": time.time(),
+            "curr_end_time": 0,
             "iterations": 0,
             "transcriptions": [],
         }
+        self.from_start = True if int(input_args.get("from_start", 0)) == 1 else False
+        
+        self.video_chunk_length_in_secs = int(input_args.get("interval_size", 1800))
+        # convert seconds to hours, minutes, seconds
+        self.end_mins_init = self.video_chunk_length_in_secs // 60
+        self.end_hrs = self.end_mins_init // 60
+        self.end_mins = self.end_mins_init % 60
+        self.end_secs = self.video_chunk_length_in_secs % 60
+        self.end_time = f"{0 if self.end_hrs < 10 else None}{self.end_hrs}:{0 if self.end_mins < 10 else None}{self.end_mins}:{self.end_secs}"
+        
         self.exit_on_video = input_args.get("exit_on_video", True)
         self.metadata = get_video_metadata(self.video_url)
         self.curr_errors = 0
@@ -125,6 +130,15 @@ class FD_RTT:
         if uploader_id == "Bloomberg":
             return "Bloomberg"
         return channel
+    
+    def get_curr_end_time(self):
+        self.stats["curr_end_time"] += self.video_chunk_length_in_secs
+        end_mins_init_tmp = self.stats["curr_end_time"]  // 60
+        end_hrs_tmp = end_mins_init_tmp // 60
+        end_mins_tmp = end_mins_init_tmp % 60
+        end_secs_tmp = self.stats["curr_end_time"] % 60
+        return f"{0 if end_hrs_tmp < 10 else None}{end_hrs_tmp}:{0 if end_mins_tmp < 10 else None}{end_mins_tmp}:{end_secs_tmp}"
+
 
     def transcribe(self, data: dict):
         """
@@ -145,20 +159,30 @@ class FD_RTT:
             # adjust all run times here based on runtime
             curr_run_time = format_time(self.stats['run_time'])
             if self.global_iteration > 0:
-                curr_total_time = self.global_iteration * MAX_ITERATIONS * VIDEO_CHUNK_LENGTH_IN_SECS + self.stats["run_time"]
+                curr_total_time = self.global_iteration * MAX_ITERATIONS * self.video_chunk_length_in_secs + self.stats["run_time"]
                 curr_run_time = format_time(curr_total_time)
             # adjust times in tokens under data
             # TODO fix this for the speech section
             for token in data.get("tokens", []):
                 token["start"] = token["start"] + curr_run_time
                 token["end"] = token["end"] + curr_run_time
-
+            
+            # write to json file
             with open(partial_output, "w", encoding="utf-8", errors="ignore") as f:
                 f.write(json.dumps(data, indent=0))
+            
+            text = data.get("text", "")
+            
+            # write to doc file
+            transcript_doc = Document()
+            transcript_doc.add_heading(f'Livestream: {self.video_title} of length {self.video_chunk_length_in_secs}s ending {self.get_curr_end_time()} of video', 0)
+            transcript_doc.add_paragraph(text)
+            docx_output = filename.replace(".mp4", ".docx")
+            transcript_doc.save(docx_output)
+            
             # append to transcription
             self.stats["transcriptions"].append(data)
             # send_discord_file(filename=partial_output, file=open(partial_output, "rb"))
-            text = data.get("text", "")
             curr_iteration = self.global_iteration * MAX_ITERATIONS + self.stats["iterations"]
             if self.db_manager:
                 self.db_manager.insert_into_db(self.video_id, text, self.video_url, curr_iteration)
@@ -258,15 +282,13 @@ class FD_RTT:
                 format_url = selected_format.get("url", "")
                 if not is_livestream:
                     filename = f"{self.video_folder}\{metadata.get('id', '')}.mp4"
-                    filename = filename.replace("-", "")
                     # get video from start
                     if not os.path.isfile(filename):
                         get_video_from_start(self.video_url, {
-                            # "end": end_time,
-                            "end": "00:00:15",
+                            "end": self.end_time,
                             "filename": filename
-                        })
-
+                        }, self.from_start)
+                        self.from_start = False
                     # transcribe audio
                     self.transcribe({"filename": filename, "is_livestream": is_livestream})
                     print("ARE YOU EVEN WORKING HERE")
@@ -276,14 +298,13 @@ class FD_RTT:
                 ic(f'Iteration: {self.stats.get("iterations", 0)}')
                 ic(format_url)
                 iterations = self.stats.get("iterations", 0)
-                # filename = f"{self.video_folder}\{metadata.get('id', '')}_{iterations}.mp4"
                 filename = f"{self.video_folder}\{iterations}.mp4"
-                filename = filename.replace("-", "")
 
                 get_video_from_start(self.video_url, {
-                    "end": end_time,
+                    "end": self.end_time,
                     "filename": filename,
-                })
+                }, self.from_start)
+                self.from_start = False
                 background_thread = Thread(target=self.transcribe, args=({"filename": filename, "is_livestream": is_livestream},))
                 background_thread.start()
             except Exception as ex:
@@ -306,7 +327,7 @@ class FD_RTT:
                         ic("Exiting since livestream is finished")
                         print("LIVESTREAM IS FINISHED")
                         # send message to discord
-                        fmtted_run_time = format_time(self.global_iteration * MAX_ITERATIONS * VIDEO_CHUNK_LENGTH_IN_SECS + self.stats['run_time'])
+                        fmtted_run_time = format_time(self.global_iteration * MAX_ITERATIONS * self.video_chunk_length_in_secs + self.stats['run_time'])
                         data = {"content": f"LIVESTREAM IS FINISHED \n Run time: {fmtted_run_time}"}
                         send_discord_msg(data)
                         append_to_github_actions("TERMINATE_LIVESTREAM=TRUE")
@@ -315,7 +336,7 @@ class FD_RTT:
                         ic("Livestream is still running")
 
         if self.global_iteration > 0:
-            fmtted_run_time = format_time(self.global_iteration * MAX_ITERATIONS * VIDEO_CHUNK_LENGTH_IN_SECS + self.stats['run_time'])
+            fmtted_run_time = format_time(self.global_iteration * MAX_ITERATIONS * self.video_chunk_length_in_secs + self.stats['run_time'])
             total_data = {
                 "content": f"**Total Run Time** {fmtted_run_time}",
             }
@@ -334,8 +355,10 @@ if __name__ == "__main__":
     # parser.add_argument('--url', '-id', help='video id', default='https://www.youtube.com/watch?v=dp8PhLsUcFE&ab_channel=BloombergQuicktake%3AOriginals')
     parser.add_argument('--url', '-id', help='video id', default='https://www.youtube.com/watch?v=21X5lGlDOfg&ab_channel=NASA')
     parser.add_argument('--exit_for_videos', '-efv', help='exit for videos, or non livestreams', default=False)
+    parser.add_argument('--interval_size', '-ivs', help='time interval for getting transcripts on livestream in seconds', default=1800)
     # save_to_db
-    parser.add_argument('--save_to_db', '-stdb', help='save to db', default=True)
+    parser.add_argument('--from_start', '-fst', help='To record livestream from start enter 1', default=0)
+    parser.add_argument('--save_to_db', '-stdb', help='Save to db', default=False)
     
     args = parser.parse_args()
     # ensure WIT_AI_TOKEN is set
@@ -347,5 +370,7 @@ if __name__ == "__main__":
         "url": args.url,
         "exit_on_video": args.exit_for_videos,
         "save_to_db": args.save_to_db,
+        "interval_size": args.interval_size,
+        "from_start": args.from_start
     }
     main(dict_args)

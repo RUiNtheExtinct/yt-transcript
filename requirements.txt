@@ -8,3 +8,4 @@ sentry_sdk
 git+https://github.com/openai/whisper.git
 dotenv
 yt-dlp
+python-docx

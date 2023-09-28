@@ -10,7 +10,7 @@ import subprocess
 import time
 from pathlib import Path
 
-import requests
+from docx import Document
 from dotenv import find_dotenv, load_dotenv
 
 from database import DB_MANAGER
@@ -119,6 +119,15 @@ class Video:
 
         with open(partial_output, "w", encoding="utf-8", errors="ignore") as f:
             f.write(json.dumps(data, indent=0))
+        
+        text = data.get("text", "")
+            
+        # write to doc file
+        transcript_doc = Document()
+        transcript_doc.add_heading(f'Video: {self.video_title}', 0)
+        transcript_doc.add_paragraph(text)
+        docx_output = filename.replace(".mp4", ".docx")
+        transcript_doc.save(docx_output)
 
         ds_data = {
             "content": data.get("text", "")

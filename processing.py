@@ -28,7 +28,7 @@ def get_video_length(video_path: str):
         return None
 
 
-def get_video_from_start(url: str, config: dict):
+def get_video_from_start(url: str, config: dict, from_start: bool):
     """
     Get video from start time.
     """
@@ -43,28 +43,16 @@ def get_video_from_start(url: str, config: dict):
     # delete filename if it exists
     if os.path.exists(filename):
         os.remove(filename)
-    #  f"-{start}", readd live stream index later
-    
-    # ffmpeg_url = subprocess.run(
-    #         f'youtube-dl -f bestaudio[ext=webm]/bestaudio -g {url} --cookies ytcookies.txt'
-    #     , shell=True, capture_output=True
-    # )
-    # print("FFMPEG OP", ffmpeg_url.stdout.decode("utf-8"))
-    
-    # result = subprocess.run(
-    #     f'ffmpeg -i "{url}" -t {end} {filename}'
-    #     # f'ffmpeg -i {url}  -t {end} -c:v copy -c:a copy {filename}'
-    #     # ["ffmpeg", "-i", f"'{url}'", "-t", end, "-copy", filename]
-    #     , shell=True, capture_output=True
-    # )
-    result = subprocess.run(
-        f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --download-sections  \"*0:00-{end}\" --cookies ytcookies.txt {url}',
-        shell=True, capture_output=True
-    )
-    # result = subprocess.run(
-    #     f'youtube-dl -x --postprocessor-args \"-t 00:{end}\" -o {filename} --cookies ytcookies.txt {url}'
-    #     , shell=True, capture_output=True
-    # )
+    if from_start:
+        result = subprocess.run(
+            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --live-from-start --download-sections  \"*0:00-{end}\" --wait-for-video 60 --cookies ytcookies.txt {url}',
+            shell=True, capture_output=True
+        )
+    else:
+        result = subprocess.run(
+            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --download-sections  \"*0:00-{end}\" --wait-for-video 60 --cookies ytcookies.txt {url}',
+            shell=True, capture_output=True
+        )
     ic(result)
     return result.stdout.decode("utf-8")
 
