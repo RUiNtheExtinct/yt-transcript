@@ -1,7 +1,9 @@
 import unittest
-from tests.testing_utils import mocked_requests_post
-from transcript_manager import FD_RTT
 from unittest import mock
+
+from tests.testing_utils import mocked_requests_post
+from transcribe_livestream import FD_RTT
+
 
 # Our test case class
 class TranscriptManager(unittest.TestCase):

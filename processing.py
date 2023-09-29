@@ -35,7 +35,7 @@ def get_video_from_start(url: str, config: dict, from_start: bool):
     # result = subprocess.run()
     # could delay start time by a few seconds to just sync up and capture the full video length
     # but would need to time how long it takes to fetch the video using youtube-dl and other adjustments and start a bit before
-    start = config.get("start", 0)
+    start = config.get("start", "0:00")
     end = config.get("end", "00:00:10")
     filename = config.get("filename", "livestream01.mp4")
     # remove all dashes from filename
@@ -50,7 +50,7 @@ def get_video_from_start(url: str, config: dict, from_start: bool):
         )
     else:
         result = subprocess.run(
-            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --download-sections  \"*0:00-{end}\" --wait-for-video 60 --cookies ytcookies.txt {url}',
+            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --download-sections  \"*{start}-{end}\" --wait-for-video 60 --cookies ytcookies.txt {url}',
             shell=True, capture_output=True
         )
     ic(result)

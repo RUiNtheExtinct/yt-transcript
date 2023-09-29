@@ -42,7 +42,7 @@ class FD_RTT:
         self.stats = {
             "run_time": 0,
             "start_time": time.time(),
-            "curr_end_time": 0,
+            "curr_start_time": 0,
             "iterations": 0,
             "transcriptions": [],
         }
@@ -131,13 +131,14 @@ class FD_RTT:
             return "Bloomberg"
         return channel
     
-    def get_curr_end_time(self):
-        self.stats["curr_end_time"] += self.video_chunk_length_in_secs
-        end_mins_init_tmp = self.stats["curr_end_time"]  // 60
+    def get_curr_start_time(self):
+        end_mins_init_tmp = self.stats["curr_start_time"]  // 60
         end_hrs_tmp = end_mins_init_tmp // 60
         end_mins_tmp = end_mins_init_tmp % 60
-        end_secs_tmp = self.stats["curr_end_time"] % 60
-        return f"{0 if end_hrs_tmp < 10 else None}{end_hrs_tmp}:{0 if end_mins_tmp < 10 else None}{end_mins_tmp}:{end_secs_tmp}"
+        end_secs_tmp = self.stats["curr_start_time"] % 60
+        end_secs_tmp = f"{0 if end_hrs_tmp < 10 else None}{end_hrs_tmp}:{0 if end_mins_tmp < 10 else None}{end_mins_tmp}:{end_secs_tmp}"
+        self.stats["curr_start_time"] += self.video_chunk_length_in_secs
+        return end_secs_tmp
 
 
     def transcribe(self, data: dict):
@@ -175,7 +176,7 @@ class FD_RTT:
             
             # write to doc file
             transcript_doc = Document()
-            transcript_doc.add_heading(f'Livestream: {self.video_title} of length {self.video_chunk_length_in_secs}s ending {self.get_curr_end_time()} of video', 0)
+            transcript_doc.add_heading(f'Livestream: {self.video_title} of length {self.video_chunk_length_in_secs}s starting at {self.get_curr_start_time()} of video', 0)
             transcript_doc.add_paragraph(text)
             docx_output = filename.replace(".mp4", ".docx")
             transcript_doc.save(docx_output)
@@ -285,6 +286,7 @@ class FD_RTT:
                     # get video from start
                     if not os.path.isfile(filename):
                         get_video_from_start(self.video_url, {
+                            "start": self.get_curr_start_time(),
                             "end": self.end_time,
                             "filename": filename
                         }, self.from_start)
@@ -301,6 +303,7 @@ class FD_RTT:
                 filename = f"{self.video_folder}\{iterations}.mp4"
 
                 get_video_from_start(self.video_url, {
+                    "start": "0:00",
                     "end": self.end_time,
                     "filename": filename,
                 }, self.from_start)
