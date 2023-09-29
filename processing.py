@@ -45,7 +45,7 @@ def get_video_from_start(url: str, config: dict, from_start: bool):
         os.remove(filename)
     if from_start:
         result = subprocess.run(
-            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --live-from-start --download-sections  \"*0:00-{end}\" --wait-for-video 60 --cookies ytcookies.txt {url}',
+            f'yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best\" -o {filename} --live-from-start --wait-for-video 60 --cookies ytcookies.txt {url}',
             shell=True, capture_output=True
         )
     else:
