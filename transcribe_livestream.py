@@ -54,7 +54,7 @@ class FD_RTT:
         self.end_hrs = self.end_mins_init // 60
         self.end_mins = self.end_mins_init % 60
         self.end_secs = self.video_chunk_length_in_secs % 60
-        self.end_time = f"{0 if self.end_hrs < 10 else None}{self.end_hrs}:{0 if self.end_mins < 10 else None}{self.end_mins}:{self.end_secs}"
+        self.end_time = f"{0 if self.end_hrs < 10 else ''}{self.end_hrs}:{0 if self.end_mins < 10 else ''}{self.end_mins}:{self.end_secs}"
         
         self.exit_on_video = input_args.get("exit_on_video", True)
         self.metadata = get_video_metadata(self.video_url)
@@ -136,7 +136,7 @@ class FD_RTT:
         end_hrs_tmp = end_mins_init_tmp // 60
         end_mins_tmp = end_mins_init_tmp % 60
         end_secs_tmp = self.stats["curr_start_time"] % 60
-        end_secs_tmp = f"{0 if end_hrs_tmp < 10 else None}{end_hrs_tmp}:{0 if end_mins_tmp < 10 else None}{end_mins_tmp}:{end_secs_tmp}"
+        end_secs_tmp = f"{0 if end_hrs_tmp < 10 else ''}{end_hrs_tmp}:{0 if end_mins_tmp < 10 else ''}{end_mins_tmp}:{end_secs_tmp}"
         self.stats["curr_start_time"] += self.video_chunk_length_in_secs
         return end_secs_tmp
 
@@ -374,6 +374,7 @@ if __name__ == "__main__":
         "exit_on_video": args.exit_for_videos,
         "save_to_db": args.save_to_db,
         "interval_size": args.interval_size,
-        "from_start": args.from_start
+        # "from_start": args.from_start
+        "from_start": "0"
     }
     main(dict_args)
