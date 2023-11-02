@@ -1,7 +1,7 @@
 import unittest
-from utils import get_video_id_from_ytube_url
-from yt_utils import get_video_metadata, get_youtube_meta_data
 
+from utils.utils import get_video_id_from_ytube_url
+from utils.yt_utils import get_video_metadata, get_youtube_meta_data
 
 
 # Our test case class

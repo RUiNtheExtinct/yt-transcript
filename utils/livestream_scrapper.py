@@ -4,12 +4,13 @@ description: grab livestream data from url using selenium, (need a browser for y
 create database entries to track livestreams, check if livestream is live or upcoming and exclude certain channels with never ending livestreams.
 """
 
-import bs4
-import time
-from selenium import webdriver
 import os
+import time
+
+import bs4
 import dateparser
-from dispatch_another_event import dispatch_github_event
+from selenium import webdriver
+
 # requirements.livestream.txt for requirements
 
 
@@ -114,7 +115,6 @@ if __name__ == "__main__":
             youtube_url = base_url + livestream["watch_url"]
             data = {"youtube_url": youtube_url, "iteration": -1, "table_name": "YahooFinance"}
             print(data)
-            dispatch_github_event(data)
         elif livestream["status"] == "UPCOMING":
             print("UPCOMING")
             print("NO UPCOMING STUFF")

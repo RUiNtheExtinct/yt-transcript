@@ -1,8 +1,10 @@
 # test cases for DB_MANAGER class in database.py using unittest
-from random import random
 import unittest
+from random import random
 
-from livestream_scrapper import get_html_from_url, get_livestreams_from_html
+from utils.livestream_scrapper import (get_html_from_url,
+                                       get_livestreams_from_html)
+
 
 class DB_LIVESTREAM_SCRAPPER(unittest.TestCase):
     # def setUp(self):

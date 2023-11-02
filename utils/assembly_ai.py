@@ -1,10 +1,12 @@
 # assembly ai
 import argparse
-import requests
-import os
-from polling import TimeoutException, poll
-import json
 import datetime
+import json
+import os
+
+import requests
+from polling import TimeoutException, poll
+
 
 class MyLogger(object):
     def debug(self, msg):

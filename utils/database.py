@@ -1,7 +1,8 @@
-#
-import mysql.connector
-from mysql.connector import pooling, PoolError 
 import os
+
+import mysql.connector
+from mysql.connector import PoolError, pooling
+
 
 class DB_MANAGER:
     def __init__(self, pool_size = 5):
@@ -121,6 +122,7 @@ if __name__ == "__main__":
     # pass 
     # db.merge_tables(table_names=["21X5lGlDOfg", "ACRlRB9k0Bs", "KWMqeJiIiMo", "TL_PSukZktA", "Tiumqeeg92w", "tde_pFZUoPk", "tmhI10y8XmI", "wl1p_H6ckt4"])
     import pandas as pd
+
     # results = DB_MANAGER().get_all_entries("YahooFinance")
     # # find all results from dp8PhLsUcFE within the last 2 days
     query = "SELECT * FROM YahooFinance WHERE created_at > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 DAY)"

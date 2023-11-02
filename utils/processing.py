@@ -12,7 +12,7 @@ import ffmpeg
 import requests
 import whisper
 
-from utils import ic, writeToLogAndPrint
+from utils.utils import ic, writeToLogAndPrint
 
 
 def get_video_length(video_path: str):

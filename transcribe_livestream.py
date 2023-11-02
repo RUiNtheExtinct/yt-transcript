@@ -13,14 +13,14 @@ from threading import Thread
 from docx import Document
 from dotenv import find_dotenv, load_dotenv
 
-from database import DB_MANAGER
-from processing import (get_video_from_start, transcribe_audio_whisper,
-                        transcribe_audio_wit)
-from utils import (append_to_github_actions, clean_string, format_time,
-                   get_video_id_from_ytube_url, ic, remove_non_ascii,
-                   send_discord_msg)
-from yt_utils import (get_video_metadata, youtube_livestream_codes,
-                      youtube_mp4_codes)
+from utils.database import DB_MANAGER
+from utils.processing import (get_video_from_start, transcribe_audio_whisper,
+                              transcribe_audio_wit)
+from utils.utils import (append_to_github_actions, clean_string, format_time,
+                         get_video_id_from_ytube_url, ic, remove_non_ascii,
+                         send_discord_msg)
+from utils.yt_utils import (get_video_metadata, youtube_livestream_codes,
+                            youtube_mp4_codes)
 
 #* load environment variables
 load_dotenv(find_dotenv())
@@ -115,7 +115,7 @@ class FD_RTT:
 
         self.global_iteration = global_iteration
 
-        self.save_to_db = input_args.get("save_to_db", True)
+        self.save_to_db = input_args.get("save_to_db", False)
 
         self.transcribe_tool = input_args.get("transcribe_tool", "whisper")
 
@@ -357,11 +357,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process livestream or audio for youtube video')
     # parser.add_argument('--url', '-id', help='video id', default='https://www.youtube.com/watch?v=dp8PhLsUcFE&ab_channel=BloombergQuicktake%3AOriginals')
     parser.add_argument('--url', '-id', help='video id', default='https://www.youtube.com/watch?v=21X5lGlDOfg&ab_channel=NASA')
-    parser.add_argument('--exit_for_videos', '-efv', help='exit for videos, or non livestreams', default=False)
-    parser.add_argument('--interval_size', '-ivs', help='time interval for getting transcripts on livestream in seconds', default=1800)
+    parser.add_argument('--exit_for_videos', '-efv', help='exit for videos, or non livestreams', default=0)
+    parser.add_argument('--interval_size', '-ivs', help='time interval for getting transcripts on livestream in seconds', default=60)
     # save_to_db
     parser.add_argument('--from_start', '-fst', help='To record livestream from start enter 1', default=0)
-    parser.add_argument('--save_to_db', '-stdb', help='Save to db', default=False)
+    parser.add_argument('--save_to_db', '-stdb', help='Save to db', default=0)
     
     args = parser.parse_args()
     # ensure WIT_AI_TOKEN is set
@@ -372,7 +372,7 @@ if __name__ == "__main__":
     dict_args = {
         "url": args.url,
         "exit_on_video": args.exit_for_videos,
-        "save_to_db": args.save_to_db,
+        "save_to_db": False if args.save_to_db == "0" else True,
         "interval_size": args.interval_size,
         # "from_start": args.from_start
         "from_start": "0"

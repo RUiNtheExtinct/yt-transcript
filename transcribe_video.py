@@ -10,13 +10,15 @@ import subprocess
 import time
 from pathlib import Path
 
+import validators
 from docx import Document
 from dotenv import find_dotenv, load_dotenv
 
-from database import DB_MANAGER
-from processing import transcribe_audio_whisper
-from utils import clean_string, get_video_id_from_ytube_url, send_discord_msg
-from yt_utils import get_video_metadata, ic
+from utils.database import DB_MANAGER
+from utils.processing import transcribe_audio_whisper
+from utils.utils import (clean_string, get_video_id_from_ytube_url,
+                         send_discord_msg)
+from utils.yt_utils import get_video_metadata, ic
 
 #* load environment variables
 load_dotenv(find_dotenv())
@@ -111,9 +113,11 @@ class Video:
 
     def transcribe_video(self):
         # check if url is a local path or a url
-        filename = os.path.join(self.video_folder, "video.mp4")
-        self.download_file_from_url()
-
+        if validators.url(self.video_url):    
+            filename = os.path.join(self.video_folder, "video.mp4")
+            self.download_file_from_url()
+        else:
+            filename = self.video_url
         data = transcribe_audio_whisper(filename, False)
         partial_output = filename.replace(".mp4", ".json")
 

@@ -1,7 +1,9 @@
 # test cases for DB_MANAGER class in database.py using unittest
-from random import random
 import unittest
-from database import DB_MANAGER
+from random import random
+
+from utils.database import DB_MANAGER
+
 
 class DB_MANAGER_TESTS(unittest.TestCase):
     def setUp(self):
